@@ -33,8 +33,7 @@ class TestBridgeGracefulShutdown:
     async def test_bridge_exit_0_sets_shutdown_event(self):
         sup = _make_supervisor()
         sup.bridge_process = _fake_process(returncode=0)
-        # OpenCode still running
-        sup.opencode_process = _fake_process(returncode=None)
+
 
         await sup.monitor_processes()
 
@@ -43,7 +42,7 @@ class TestBridgeGracefulShutdown:
     async def test_bridge_exit_0_does_not_restart(self):
         sup = _make_supervisor()
         sup.bridge_process = _fake_process(returncode=0)
-        sup.opencode_process = _fake_process(returncode=None)
+
         sup.start_bridge = AsyncMock()
 
         await sup.monitor_processes()
@@ -56,7 +55,7 @@ class TestBridgeCrashRestart:
 
     async def test_bridge_crash_restarts_with_backoff(self):
         sup = _make_supervisor()
-        sup.opencode_process = _fake_process(returncode=None)
+
         sup.start_bridge = AsyncMock()
         sup._report_fatal_error = AsyncMock()
 
@@ -80,7 +79,7 @@ class TestBridgeCrashRestart:
 
     async def test_bridge_crash_exceeds_max_restarts(self):
         sup = _make_supervisor()
-        sup.opencode_process = _fake_process(returncode=None)
+
         sup._report_fatal_error = AsyncMock()
 
         # Bridge always returns exit code 1 (keeps crashing)
@@ -98,7 +97,7 @@ class TestBridgeCrashRestart:
     async def test_bridge_killed_by_signal_restarts(self):
         """Negative exit codes (killed by signal) should trigger restart."""
         sup = _make_supervisor()
-        sup.opencode_process = _fake_process(returncode=None)
+
 
         original_process = _fake_process(returncode=-15)  # SIGTERM
         running_process = _fake_process(returncode=None)
@@ -121,7 +120,7 @@ class TestBridgeBackoffTiming:
 
     async def test_first_restart_uses_base_delay(self):
         sup = _make_supervisor()
-        sup.opencode_process = _fake_process(returncode=None)
+
 
         original_process = _fake_process(returncode=1)
         running_process = _fake_process(returncode=None)
@@ -141,7 +140,7 @@ class TestBridgeBackoffTiming:
 
     async def test_backoff_is_capped_at_max(self):
         sup = _make_supervisor()
-        sup.opencode_process = _fake_process(returncode=None)
+
         sup._report_fatal_error = AsyncMock()
 
         # Bridge keeps crashing until max restarts
