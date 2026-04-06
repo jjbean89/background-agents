@@ -5,7 +5,8 @@ This image provides a complete development environment with:
 - Debian slim base with git, curl, build-essential
 - Node.js 22 LTS, pnpm, Bun runtime
 - Python 3.12 with uv
-- OpenCode CLI pre-installed
+- Claude Code CLI pre-installed
+- Claude Agent SDK + FastMCP for programmatic agent control
 - agent-browser CLI with headless Chrome for browser automation
 - Sandbox entrypoint and bridge code
 """
@@ -19,9 +20,6 @@ import sandbox_runtime
 # Get the path to the sandbox runtime code (provider-agnostic)
 SANDBOX_RUNTIME_DIR = Path(sandbox_runtime.__file__).parent
 
-# OpenCode version to install
-OPENCODE_VERSION = "latest"
-
 # code-server version to install (pinned for reproducible images)
 CODE_SERVER_VERSION = "4.109.5"
 
@@ -29,8 +27,8 @@ CODE_SERVER_VERSION = "4.109.5"
 AGENT_BROWSER_VERSION = "0.21.2"
 
 # Cache buster - change this to force Modal image rebuild
-# v44: replace Playwright with agent-browser for browser automation
-CACHE_BUSTER = "v44-agent-browser"
+# v45: replace OpenCode with Claude Code CLI + Agent SDK
+CACHE_BUSTER = "v45-claude-code"
 
 # Base image with all development tools
 base_image = (
@@ -99,15 +97,17 @@ base_image = (
         "pydantic>=2.0",  # Required for sandbox types
         "PyJWT[crypto]",  # For GitHub App token generation (includes cryptography)
     )
-    # Install OpenCode CLI and plugin for custom tools
+    # Install Claude Code CLI for agent runtime
     # CACHE_BUSTER is embedded in a no-op echo so Modal invalidates this layer on bump.
     .run_commands(
         f"echo 'cache: {CACHE_BUSTER}' > /dev/null",
-        "npm install -g opencode-ai@latest",
-        "opencode --version || echo 'OpenCode installed'",
-        # Install @opencode-ai/plugin globally for custom tools
-        # This ensures tools can import the plugin without needing to run bun add
-        "npm install -g @opencode-ai/plugin@latest zod",
+        "npm install -g @anthropic-ai/claude-code",
+        "claude --version || echo 'Claude Code installed'",
+    )
+    # Install Claude Agent SDK and FastMCP for programmatic agent control and custom tools
+    .pip_install(
+        "claude-agent-sdk",
+        "fastmcp",
     )
     # Install code-server for browser-based VS Code editing (direct .deb from GitHub releases)
     .run_commands(
@@ -128,8 +128,8 @@ base_image = (
     .run_commands(
         "mkdir -p /workspace",
         "mkdir -p /app/plugins",
-        "mkdir -p /tmp/opencode",
-        "echo 'Image rebuilt at: v21-force-rebuild' > /app/image-version.txt",
+        "mkdir -p /root/.claude",
+        "echo 'Image rebuilt at: v45-claude-code' > /app/image-version.txt",
     )
     # Set environment variables (including cache buster to force rebuild)
     .env(
@@ -140,11 +140,11 @@ base_image = (
             "PATH": "/root/.bun/bin:/root/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin",
             "PYTHONPATH": "/app",
             "SANDBOX_VERSION": CACHE_BUSTER,
-            # NODE_PATH for globally installed modules (used by custom tools)
+            # NODE_PATH for globally installed modules (used by Claude Code)
             "NODE_PATH": "/usr/lib/node_modules",
         }
     )
-    # Add sandbox runtime code to the image (provider-agnostic bridge, entrypoint, tools, plugins)
+    # Add sandbox runtime code to the image (bridge, entrypoint, MCP tools)
     .add_local_dir(
         str(SANDBOX_RUNTIME_DIR),
         remote_path="/app/sandbox_runtime",
