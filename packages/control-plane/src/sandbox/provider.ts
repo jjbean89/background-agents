@@ -40,9 +40,7 @@ export interface CreateSandboxConfig {
   controlPlaneUrl: string;
   /** Authentication token for sandbox */
   sandboxAuthToken: string;
-  /** LLM provider (e.g., "anthropic") */
-  provider: string;
-  /** LLM model (e.g., "claude-sonnet-4-5") */
+  /** LLM model (e.g., "claude-sonnet-4-6") */
   model: string;
   /** User-provided environment variables (repo secrets) */
   userEnvVars?: Record<string, string>;
@@ -102,9 +100,7 @@ export interface RestoreConfig {
   repoOwner: string;
   /** Repository name */
   repoName: string;
-  /** LLM provider (e.g., "anthropic") */
-  provider: string;
-  /** LLM model (e.g., "claude-sonnet-4-5") */
+  /** LLM model (e.g., "claude-sonnet-4-6") */
   model: string;
   /** User-provided environment variables (repo secrets) */
   userEnvVars?: Record<string, string>;

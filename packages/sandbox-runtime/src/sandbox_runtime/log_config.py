@@ -95,7 +95,7 @@ class StructuredLogger:
     Usage:
         log = StructuredLogger("bridge", context={"sandbox_id": "sb-123"})
         log.info("bridge.connect", ws_url="wss://...")
-        log.bind(opencode_session_id="ses_abc")
+        log.bind(session_id="ses_abc")
         child = log.child(message_id="msg-1")
     """
 
