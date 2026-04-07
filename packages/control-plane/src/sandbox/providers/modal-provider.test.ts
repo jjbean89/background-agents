@@ -484,7 +484,6 @@ describe("ModalSandboxProvider", () => {
           controlPlaneUrl: "https://test.com",
           repoOwner: "owner",
           repoName: "repo",
-          provider: "anthropic",
           model: "anthropic/claude-sonnet-4-5",
         });
         expect.fail("Should have thrown");
@@ -511,7 +510,6 @@ describe("ModalSandboxProvider", () => {
           controlPlaneUrl: "https://test.com",
           repoOwner: "owner",
           repoName: "repo",
-          provider: "anthropic",
           model: "anthropic/claude-sonnet-4-5",
         });
         expect.fail("Should have thrown");
@@ -560,7 +558,6 @@ describe("ModalSandboxProvider", () => {
         controlPlaneUrl: "https://test.com",
         repoOwner: "owner",
         repoName: "repo",
-        provider: "anthropic",
         model: "anthropic/claude-sonnet-4-5",
       });
 

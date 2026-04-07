@@ -342,7 +342,7 @@ export class SandboxLifecycleManager {
       });
 
       const userEnvVars = await this.storage.getUserEnvVars();
-      const { provider, model: modelId } = this.resolveProviderAndModel(session);
+      const { model: modelId } = this.resolveProviderAndModel(session);
 
       // Look up pre-built repo image (graceful fallback on failure)
       let repoImageId: string | null = null;
@@ -382,7 +382,6 @@ export class SandboxLifecycleManager {
         repoName: session.repo_name,
         controlPlaneUrl: this.config.controlPlaneUrl,
         sandboxAuthToken,
-        provider,
         model: modelId,
         userEnvVars,
         repoImageId,
@@ -497,7 +496,7 @@ export class SandboxLifecycleManager {
       });
 
       const userEnvVars = await this.storage.getUserEnvVars();
-      const { provider, model: modelId } = this.resolveProviderAndModel(session);
+      const { model: modelId } = this.resolveProviderAndModel(session);
 
       // Child sessions get a shorter timeout (same logic as doSpawn)
       const timeoutSeconds =
@@ -513,7 +512,6 @@ export class SandboxLifecycleManager {
         controlPlaneUrl: this.config.controlPlaneUrl,
         repoOwner: session.repo_owner,
         repoName: session.repo_name,
-        provider,
         model: modelId,
         userEnvVars,
         timeoutSeconds,
@@ -859,7 +857,7 @@ export class SandboxLifecycleManager {
 
   /**
    * Resolve the provider and model ID from the session or config default.
-   * e.g., "openai/gpt-5.2-codex" -> { provider: "openai", model: "gpt-5.2-codex" }
+   * e.g., "anthropic/claude-sonnet-4-6" -> { provider: "anthropic", model: "claude-sonnet-4-6" }
    */
   private resolveProviderAndModel(session: SessionRow): { provider: string; model: string } {
     return extractProviderAndModel(session.model || this.config.model);

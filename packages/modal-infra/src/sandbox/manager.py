@@ -24,7 +24,7 @@ from sandbox_runtime.constants import CODE_SERVER_PORT
 from sandbox_runtime.log_config import get_logger
 from sandbox_runtime.types import SandboxStatus, SessionConfig
 
-from ..app import app, llm_secrets
+from ..app import app, claude_auth_volume
 from ..images.base import base_image
 
 log = get_logger("manager")
@@ -271,10 +271,11 @@ class SandboxManager:
         create_kwargs: dict = {
             "image": image,
             "app": app,
-            "secrets": [llm_secrets],
+            "secrets": [],
             "timeout": config.timeout_seconds,
             "workdir": "/workspace",
             "env": env_vars,
+            "volumes": {"/root/.claude": claude_auth_volume},
         }
         exposed_ports, tunnel_ports = self._collect_exposed_ports(
             config.code_server_enabled, config.settings
@@ -329,7 +330,7 @@ class SandboxManager:
         Create a sandbox specifically for image building.
 
         Like create_sandbox() but:
-        - Sets IMAGE_BUILD_MODE=true (exits after setup, no OpenCode/bridge)
+        - Sets IMAGE_BUILD_MODE=true (exits after setup, no agent/bridge)
         - No CONTROL_PLANE_URL, SANDBOX_AUTH_TOKEN, or LLM secrets
         - Shorter timeout (30 min vs 2 hours)
         - Always uses base_image (builds start from the universal base)
@@ -440,7 +441,7 @@ class SandboxManager:
 
         Captures the full state including:
         - Repository with uncommitted changes
-        - OpenCode session state
+        - Claude Code session state
         - Any cached artifacts
 
         Args:
@@ -512,7 +513,7 @@ class SandboxManager:
         """
         Create a new sandbox from a filesystem snapshot Image.
 
-        The OpenCode session resumes with full workspace state intact.
+        The Claude Code session resumes with full workspace state intact.
         Git clone is skipped since the workspace already has all changes.
 
         Args:
@@ -532,14 +533,12 @@ class SandboxManager:
         if isinstance(session_config, dict):
             repo_owner = session_config.get("repo_owner", "")
             repo_name = session_config.get("repo_name", "")
-            provider = session_config.get("provider", "anthropic")
             model = session_config.get("model", "claude-sonnet-4-6")
             session_id = session_config.get("session_id", "")
             branch = session_config.get("branch")
         else:
             repo_owner = session_config.repo_owner
             repo_name = session_config.repo_name
-            provider = session_config.provider
             model = session_config.model
             session_id = session_config.session_id
             branch = session_config.branch
@@ -571,7 +570,6 @@ class SandboxManager:
                         "session_id": session_id,
                         "repo_owner": repo_owner,
                         "repo_name": repo_name,
-                        "provider": provider,
                         "model": model,
                         **({"branch": branch} if branch else {}),
                     }
@@ -590,10 +588,11 @@ class SandboxManager:
         create_kwargs: dict = {
             "image": image,  # Use the snapshot image directly
             "app": app,
-            "secrets": [llm_secrets],
+            "secrets": [],
             "timeout": timeout_seconds,
             "workdir": "/workspace",
             "env": env_vars,
+            "volumes": {"/root/.claude": claude_auth_volume},
         }
         exposed_ports, tunnel_ports = self._collect_exposed_ports(code_server_enabled, settings)
         if exposed_ports:

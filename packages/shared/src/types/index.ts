@@ -64,7 +64,7 @@ export interface Session {
   branchName: string | null;
   baseSha: string | null;
   currentSha: string | null;
-  opencodeSessionId: string | null;
+  agentSessionId: string | null;
   status: SessionStatus;
   parentSessionId: string | null;
   spawnSource: SpawnSource;

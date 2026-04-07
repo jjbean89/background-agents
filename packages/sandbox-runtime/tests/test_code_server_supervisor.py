@@ -32,7 +32,7 @@ class TestCodeServerMonitorRestart:
     async def test_code_server_crash_does_not_set_shutdown(self):
         """code-server crash should NOT trigger supervisor shutdown."""
         sup = self._make_supervisor()
-        sup.opencode_process = self._fake_process(returncode=None)
+
         sup.bridge_process = self._fake_process(returncode=None)
 
         # code-server exited with code 1
@@ -58,7 +58,7 @@ class TestCodeServerMonitorRestart:
     async def test_code_server_restart_exception_is_caught(self):
         """If start_code_server() raises, the supervisor continues running."""
         sup = self._make_supervisor()
-        sup.opencode_process = self._fake_process(returncode=None)
+
         sup.bridge_process = self._fake_process(returncode=None)
         sup.code_server_process = self._fake_process(returncode=1)
 
@@ -91,7 +91,7 @@ class TestCodeServerMonitorRestart:
     async def test_code_server_max_restarts_gives_up(self):
         """After MAX_RESTARTS, code-server is abandoned (process set to None)."""
         sup = self._make_supervisor()
-        sup.opencode_process = self._fake_process(returncode=None)
+
         sup.bridge_process = self._fake_process(returncode=None)
 
         # code-server always crashes
